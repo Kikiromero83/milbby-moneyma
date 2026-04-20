@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="Capa_1" data-name="Capa 1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 1000 1000">
+  <defs>
+    <style>
+      .cls-1 {
+        filter: url(#drop-shadow-2);
+      }
+
+      .cls-2, .cls-3 {
+        fill: #fff;
+      }
+
+      .cls-4 {
+        fill: #5e00c4;
+      }
+
+      .cls-3 {
+        font-family: GillSansNova-Bold, 'Gill Sans Nova';
+        font-size: 115.72px;
+        font-weight: 700;
+      }
+    </style>
+    <filter id="drop-shadow-2" x="-40.43" y="-44.68" width="2991.69" height="1104.65" filterUnits="userSpaceOnUse">
+      <feOffset dx="2" dy="2"/>
+      <feGaussianBlur result="blur" stdDeviation="2"/>
+      <feFlood flood-color="#000" flood-opacity=".75"/>
+      <feComposite in2="blur" operator="in"/>
+      <feComposite in="SourceGraphic"/>
+    </filter>
+  </defs>
+  <g class="cls-1">
+    <rect class="cls-4" x="-40.43" y="-44.68" width="1080.85" height="1104.65"/>
+    <g>
+      <text class="cls-3" transform="translate(125.53 793.05)"><tspan x="0" y="0">MONEY MAP</tspan></text>
+      <path class="cls-2" d="M874.47,311.38c0-75.31-61.06-136.37-136.37-136.37H125.53v490.9h228.43v-258.02h34.04v258.02h223.98v-258.02h34.04v258.02h228.43v-354.53h.01Z"/>
+    </g>
+  </g>
+</svg>

@@ -1,0 +1,28 @@
+{
+  "name": "Auditoría Money Map",
+  "short_name": "Money Map",
+  "description": "Sube las fotos de implantación de Money Map de tu tienda",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#5400BD",
+  "theme_color": "#5400BD",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
