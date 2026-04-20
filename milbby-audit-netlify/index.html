@@ -11,6 +11,7 @@
 <link rel="icon" type="image/svg+xml" href="icon.svg">
 <meta name="theme-color" content="#5400BD">
 <meta name="apple-mobile-web-app-title" content="Milbby Audit">
+<script src="https://alcdn.msauth.net/browser/2.38.0/js/msal-browser.min.js"></script>
 <style>
 @font-face {
   font-family: 'GillSansNova';
@@ -686,7 +687,7 @@ body {
   <h1 class="login-title">Auditoría Money Map</h1>
 
   <div style="width:100%;max-width:320px;margin:0 auto;">
-    <input type="email" id="login-email" placeholder="tu.correo@milbby.com" 
+    <input type="email" id="login-email" placeholder="tu.correo@milbby.com"
       style="width:100%;padding:14px 16px;border-radius:12px;border:2px solid #e0d4f0;font-size:15px;font-family:inherit;margin-bottom:12px;text-align:center;box-sizing:border-box;outline:none;transition:border-color 0.2s;"
       onfocus="this.style.borderColor='#5400BD'" onblur="this.style.borderColor='#e0d4f0'"
       onkeydown="if(event.key==='Enter')handleLogin()">
@@ -1049,6 +1050,7 @@ const storeMap = {
   'responsable.xirivella.granturia@milbby.com': 'Gran Turia',
   // ===== USUARIO TEST =====
   'elenadelrio@milbby.com': 'Test Elena',
+  'david.castro@tansley.eu': 'Test David',
 };
 
 // ===================== ADMIN USERS =====================
@@ -1094,6 +1096,22 @@ let currentSlot = null;
 let currentSlotCount = 0;
 
 // ===================== LOGIN (modo pruebas — sin contraseña) =====================
+// ===================== MSAL CONFIG (solo para token de SharePoint) =====================
+const msalConfig = {
+  auth: {
+    clientId: '6836b357-479f-4e1a-bc13-7c8f7f01da32',
+    authority: 'https://login.microsoftonline.com/7bf8776c-7270-41e3-818a-8e6675f3e93a',
+    redirectUri: window.location.origin + window.location.pathname
+  },
+  cache: { cacheLocation: 'sessionStorage', storeAuthStateInCookie: false }
+};
+
+const msalInstance = new msal.PublicClientApplication(msalConfig);
+
+// Handle redirect callback silently
+msalInstance.handleRedirectPromise().catch(err => console.error('Redirect error:', err));
+
+// ===================== LOGIN (email para pruebas) =====================
 function handleLogin() {
   const emailInput = document.getElementById('login-email');
   const email = emailInput.value.trim().toLowerCase();
@@ -1146,6 +1164,41 @@ function showLoginError(msg) {
   }
   errorEl.textContent = msg;
   setTimeout(() => { if (errorEl) errorEl.textContent = ''; }, 5000);
+}
+
+// ===================== GET TOKEN (pide login Microsoft solo al subir fotos) =====================
+async function getAccessToken() {
+  // Primero intenta silenciosamente si ya hay sesión
+  const accounts = msalInstance.getAllAccounts();
+  if (accounts.length > 0) {
+    try {
+      const response = await msalInstance.acquireTokenSilent({
+        scopes: ['Files.ReadWrite.All'],
+        account: accounts[0]
+      });
+      return response.accessToken;
+    } catch (err) {
+      // Silent failed, will try popup below
+    }
+  }
+
+  // No hay sesión o falló silencioso → pedir login con popup
+  try {
+    const response = await msalInstance.loginPopup({
+      scopes: ['User.Read', 'Files.ReadWrite.All']
+    });
+    return response.accessToken;
+  } catch (popupErr) {
+    // Si popup bloqueado, intentar redirect
+    try {
+      await msalInstance.loginRedirect({
+        scopes: ['User.Read', 'Files.ReadWrite.All']
+      });
+    } catch (redirectErr) {
+      console.error('Auth error:', redirectErr);
+    }
+    return null;
+  }
 }
 
 // ===================== NAVIGATION =====================
@@ -1288,27 +1341,176 @@ function confirmSubmit() {
 function closeConfirm() {
   document.getElementById('confirm-modal').classList.remove('active');
 }
-function submitAll() {
+// ===================== SHAREPOINT CONFIG =====================
+const SHAREPOINT_SITE = 'grupotansley.sharepoint.com';
+const SHAREPOINT_SITE_PATH = '/sites/MILBBY-MilbbyTiendas';
+const SHAREPOINT_BASE_FOLDER = 'Milbby Tiendas/Compartir con Responsables tienda/MoneyMap_App';
+
+let spSiteId = null;
+let spDriveId = null;
+
+async function resolveSiteAndDrive(token) {
+  if (spSiteId && spDriveId) return true;
+  try {
+    // Get site ID
+    const siteRes = await fetch(
+      `https://graph.microsoft.com/v1.0/sites/${SHAREPOINT_SITE}:${SHAREPOINT_SITE_PATH}`,
+      { headers: { 'Authorization': 'Bearer ' + token } }
+    );
+    if (!siteRes.ok) throw new Error('No se pudo acceder al sitio SharePoint: ' + siteRes.status);
+    const siteData = await siteRes.json();
+    spSiteId = siteData.id;
+
+    // Get default drive (Shared Documents)
+    const drivesRes = await fetch(
+      `https://graph.microsoft.com/v1.0/sites/${spSiteId}/drives`,
+      { headers: { 'Authorization': 'Bearer ' + token } }
+    );
+    if (!drivesRes.ok) throw new Error('No se pudo acceder a las bibliotecas: ' + drivesRes.status);
+    const drivesData = await drivesRes.json();
+    // Find "Documents" or "Shared Documents" drive
+    const drive = drivesData.value.find(d => d.name === 'Documents' || d.name === 'Shared Documents' || d.name === 'Documentos') || drivesData.value[0];
+    spDriveId = drive.id;
+    return true;
+  } catch (err) {
+    console.error('SharePoint resolve error:', err);
+    return false;
+  }
+}
+
+function dataURLtoBlob(dataURL) {
+  const parts = dataURL.split(',');
+  const mime = parts[0].match(/:(.*?);/)[1];
+  const raw = atob(parts[1]);
+  const arr = new Uint8Array(raw.length);
+  for (let i = 0; i < raw.length; i++) arr[i] = raw.charCodeAt(i);
+  return new Blob([arr], { type: mime });
+}
+
+async function uploadFileToSharePoint(token, folderPath, fileName, blob) {
+  // Use simple upload for files < 4MB, otherwise use upload session
+  const filePath = `${folderPath}/${fileName}`.replace(/\/+/g, '/');
+  const url = `https://graph.microsoft.com/v1.0/drives/${spDriveId}/root:/${filePath}:/content`;
+
+  if (blob.size < 4 * 1024 * 1024) {
+    // Simple upload
+    const res = await fetch(url, {
+      method: 'PUT',
+      headers: {
+        'Authorization': 'Bearer ' + token,
+        'Content-Type': blob.type
+      },
+      body: blob
+    });
+    if (!res.ok) {
+      const errText = await res.text();
+      throw new Error(`Upload failed (${res.status}): ${errText}`);
+    }
+    return await res.json();
+  } else {
+    // Large file: create upload session
+    const sessionUrl = `https://graph.microsoft.com/v1.0/drives/${spDriveId}/root:/${filePath}:/createUploadSession`;
+    const sessionRes = await fetch(sessionUrl, {
+      method: 'POST',
+      headers: {
+        'Authorization': 'Bearer ' + token,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ item: { '@microsoft.graph.conflictBehavior': 'rename' } })
+    });
+    if (!sessionRes.ok) throw new Error('Could not create upload session');
+    const session = await sessionRes.json();
+
+    // Upload in chunks
+    const chunkSize = 3.25 * 1024 * 1024; // 3.25 MB
+    let offset = 0;
+    while (offset < blob.size) {
+      const end = Math.min(offset + chunkSize, blob.size);
+      const chunk = blob.slice(offset, end);
+      const uploadRes = await fetch(session.uploadUrl, {
+        method: 'PUT',
+        headers: {
+          'Content-Length': (end - offset).toString(),
+          'Content-Range': `bytes ${offset}-${end - 1}/${blob.size}`
+        },
+        body: chunk
+      });
+      if (!uploadRes.ok && uploadRes.status !== 202) {
+        throw new Error('Chunk upload failed');
+      }
+      offset = end;
+    }
+    return true;
+  }
+}
+
+async function submitAll() {
   closeConfirm();
   const overlay = document.getElementById('uploading-overlay');
   overlay.classList.add('active');
 
-  // Build SharePoint folder path: /CAMPAÑA/TIENDA/ZONA/
-  const folderBase = `${currentCampaign.name}/${selectedStore}`;
-  console.log('📁 SharePoint upload path:', folderBase);
-  Object.keys(zones).forEach(key => {
-    const zone = zones[key];
-    const count = zone.photos.filter(Boolean).length;
-    if (count > 0) {
-      console.log(`  → ${folderBase}/${zone.name}/ (${count} fotos)`);
-    }
-  });
+  // Update overlay text
+  const overlayText = overlay.querySelector('p') || overlay.querySelector('div:last-child');
+  function setStatus(msg) {
+    if (overlayText) overlayText.textContent = msg;
+    console.log('📤 ' + msg);
+  }
 
-  setTimeout(() => {
+  try {
+    setStatus('Obteniendo permisos...');
+    const token = await getAccessToken();
+    if (!token) throw new Error('No se pudo obtener el token de acceso. Inicia sesión de nuevo.');
+
+    setStatus('Conectando con SharePoint...');
+    const resolved = await resolveSiteAndDrive(token);
+    if (!resolved) throw new Error('No se pudo conectar con SharePoint.');
+
+    // Clean campaign name for folder (remove special chars that SharePoint doesn't like)
+    const safeCampaignName = currentCampaign.name.replace(/[<>:"/\\|?*]/g, '_').replace(/\s*—\s*/g, ' - ');
+    const safeStoreName = selectedStore.replace(/[<>:"/\\|?*]/g, '_');
+    const basePath = `${SHAREPOINT_BASE_FOLDER}/${safeCampaignName}/${safeStoreName}`;
+
+    let totalUploaded = 0;
+    let totalToUpload = 0;
+
+    // Count total photos
+    Object.keys(zones).forEach(key => {
+      totalToUpload += zones[key].photos.filter(Boolean).length;
+    });
+
+    // Upload each zone's photos
+    for (const key of Object.keys(zones)) {
+      const zone = zones[key];
+      const photos = zone.photos.filter(Boolean);
+      if (photos.length === 0) continue;
+
+      const safeZoneName = zone.name.replace(/[<>:"/\\|?*]/g, '_');
+      const folderPath = `${basePath}/${safeZoneName}`;
+
+      for (let i = 0; i < photos.length; i++) {
+        totalUploaded++;
+        setStatus(`Subiendo foto ${totalUploaded} de ${totalToUpload}...`);
+
+        const blob = dataURLtoBlob(photos[i]);
+        const ext = blob.type === 'image/png' ? 'png' : 'jpg';
+        const fileName = `${safeZoneName}_${i + 1}.${ext}`;
+
+        await uploadFileToSharePoint(token, folderPath, fileName, blob);
+      }
+    }
+
+    setStatus('¡Fotos enviadas correctamente!');
+    setTimeout(() => {
+      overlay.classList.remove('active');
+      document.getElementById('success-store').textContent = selectedStore;
+      goTo('screen-success');
+    }, 1000);
+
+  } catch (err) {
+    console.error('Upload error:', err);
     overlay.classList.remove('active');
-    document.getElementById('success-store').textContent = selectedStore;
-    goTo('screen-success');
-  }, 2500);
+    alert('Error al subir las fotos:\n' + err.message + '\n\nInténtalo de nuevo.');
+  }
 }
 
 // ===================== ADMIN =====================
@@ -1497,15 +1699,14 @@ function closeNewCampaign() {
 function openNewCampaignFull() {
   document.getElementById('new-full-campaign-name').value = '';
   document.getElementById('new-full-campaign-start').value = '';
-  // deadline auto-calculated as start + 2 days
   const createBtn = document.getElementById('new-full-campaign-btn-create');
   createBtn.classList.remove('ready');
   createBtn.style.opacity = '0.4';
   createBtn.style.pointerEvents = 'none';
-  document.getElementById('new-full-campaign-modal').classList.add('active');
+  document.getElementById('new-full-campaign-modal').style.display = 'flex';
 }
 function closeNewCampaignFull() {
-  document.getElementById('new-full-campaign-modal').classList.remove('active');
+  document.getElementById('new-full-campaign-modal').style.display = 'none';
 }
 
 function checkNewCampaignReady() {
