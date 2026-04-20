@@ -632,7 +632,6 @@ body {
 #new-full-campaign-modal .admin-field label { display: block; font-size: 12px; font-weight: 600; color: #888; margin-bottom: 5px; }
 #new-full-campaign-modal .admin-field input { width: 100%; padding: 10px 12px; border: 1.5px solid #e0e0e0; border-radius: 10px; font-size: 14px; font-family: inherit; box-sizing: border-box; }
 </style>
-<script src="https://alcdn.msauth.net/browser/2.38.3/js/msal-browser.min.js"></script>
 </head>
 <body>
 
@@ -667,10 +666,15 @@ body {
 
   <h1 class="login-title">Auditoría Money Map</h1>
 
-  <button class="btn-microsoft" onclick="handleLogin()">
-    <svg viewBox="0 0 23 23"><rect x="1" y="1" width="10" height="10" fill="#F25022"/><rect x="12" y="1" width="10" height="10" fill="#7FBA00"/><rect x="1" y="12" width="10" height="10" fill="#00A4EF"/><rect x="12" y="12" width="10" height="10" fill="#FFB900"/></svg>
-    Iniciar sesión con Microsoft
-  </button>
+  <div style="width:100%;max-width:320px;margin:0 auto;">
+    <input type="email" id="login-email" placeholder="tu.correo@milbby.com" 
+      style="width:100%;padding:14px 16px;border-radius:12px;border:2px solid #e0d4f0;font-size:15px;font-family:inherit;margin-bottom:12px;text-align:center;box-sizing:border-box;outline:none;transition:border-color 0.2s;"
+      onfocus="this.style.borderColor='#5400BD'" onblur="this.style.borderColor='#e0d4f0'"
+      onkeydown="if(event.key==='Enter')handleLogin()">
+    <button class="btn-microsoft" onclick="handleLogin()" style="width:100%;">
+      Entrar
+    </button>
+  </div>
 </div>
 
 <!-- ==================== HOME ==================== -->
@@ -1070,61 +1074,16 @@ let currentZone = null;
 let currentSlot = null;
 let currentSlotCount = 0;
 
-// ===================== MSAL CONFIG =====================
-const msalConfig = {
-  auth: {
-    clientId: '6836b357-479f-4e1a-bc13-7c8f7f01da32',
-    authority: 'https://login.microsoftonline.com/7bf8776c-7270-41e3-818a-8e6675f3e93a',
-    redirectUri: window.location.origin,
-  },
-  cache: {
-    cacheLocation: 'sessionStorage',
-    storeAuthStateInCookie: false,
+// ===================== LOGIN (modo pruebas — sin contraseña) =====================
+function handleLogin() {
+  const emailInput = document.getElementById('login-email');
+  const email = emailInput.value.trim().toLowerCase();
+
+  if (!email) {
+    showLoginError('Introduce tu correo electrónico');
+    return;
   }
-};
 
-const msalInstance = new msal.PublicClientApplication(msalConfig);
-
-const loginRequest = {
-  scopes: ['User.Read']
-};
-
-// ===================== LOGIN =====================
-async function handleLogin() {
-  const btn = document.querySelector('.btn-microsoft');
-  btn.textContent = 'Conectando...';
-  btn.disabled = true;
-
-  try {
-    const response = await msalInstance.loginPopup(loginRequest);
-    const email = response.account.username.toLowerCase();
-    processLogin(email);
-  } catch (error) {
-    console.error('Login error:', error);
-    // If popup blocked, try redirect
-    if (error.errorCode === 'popup_window_error' || error.errorCode === 'empty_window_error') {
-      try {
-        await msalInstance.loginRedirect(loginRequest);
-        return;
-      } catch (redirectError) {
-        console.error('Redirect error:', redirectError);
-      }
-    }
-    showLoginError('No se pudo iniciar sesión. Inténtalo de nuevo.');
-    btn.innerHTML = '<svg viewBox="0 0 23 23"><rect x="1" y="1" width="10" height="10" fill="#F25022"/><rect x="12" y="1" width="10" height="10" fill="#7FBA00"/><rect x="1" y="12" width="10" height="10" fill="#00A4EF"/><rect x="12" y="12" width="10" height="10" fill="#FFB900"/></svg> Iniciar sesión con Microsoft';
-    btn.disabled = false;
-  }
-}
-
-// Handle redirect response (if popup was blocked)
-msalInstance.handleRedirectPromise().then(response => {
-  if (response) {
-    const email = response.account.username.toLowerCase();
-    processLogin(email);
-  }
-}).catch(err => console.error('Redirect handle error:', err));
-
-function processLogin(email) {
   // Check if admin
   if (adminUsers[email]) {
     currentUserEmail = email;
@@ -1155,13 +1114,7 @@ function processLogin(email) {
     return;
   }
 
-  // Unknown email — still logged in via Microsoft but not in our map
-  showLoginError('Tu cuenta ' + email + ' no tiene acceso a esta app. Contacta con Marketing.');
-  const btn = document.querySelector('.btn-microsoft');
-  btn.innerHTML = '<svg viewBox="0 0 23 23"><rect x="1" y="1" width="10" height="10" fill="#F25022"/><rect x="12" y="1" width="10" height="10" fill="#7FBA00"/><rect x="1" y="12" width="10" height="10" fill="#00A4EF"/><rect x="12" y="12" width="10" height="10" fill="#FFB900"/></svg> Iniciar sesión con Microsoft';
-  btn.disabled = false;
-  // Sign out so they can try another account
-  msalInstance.logoutPopup({ mainWindowRedirectUri: window.location.origin }).catch(() => {});
+  showLoginError('Correo no reconocido. Usa tu cuenta @milbby.com asignada.');
 }
 
 function showLoginError(msg) {
@@ -1553,14 +1506,8 @@ function resetApp() {
   document.getElementById('welcome-card').style.display = 'none';
   document.getElementById('zones-wrapper').style.display = 'none';
   document.getElementById('progress-section').style.display = 'none';
-  // Sign out of Microsoft
-  msalInstance.logoutPopup({ mainWindowRedirectUri: window.location.origin }).catch(() => {
-    // If popup fails, just go to login
-  });
+  document.getElementById('login-email').value = '';
   goTo('screen-login');
-  const btn = document.querySelector('.btn-microsoft');
-  btn.innerHTML = '<svg viewBox="0 0 23 23"><rect x="1" y="1" width="10" height="10" fill="#F25022"/><rect x="12" y="1" width="10" height="10" fill="#7FBA00"/><rect x="1" y="12" width="10" height="10" fill="#00A4EF"/><rect x="12" y="12" width="10" height="10" fill="#FFB900"/></svg> Iniciar sesión con Microsoft';
-  btn.disabled = false;
 }
 
 // Init
