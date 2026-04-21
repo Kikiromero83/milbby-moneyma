@@ -754,7 +754,7 @@ body {
     <div class="welcome-card" id="welcome-card">
       <div class="welcome-label" id="home-campaign-label">Campaña activa</div>
       <div class="welcome-campaign" id="home-campaign-name">Money Map — Día de la Madre</div>
-      <div class="welcome-deadline">
+      <div class="welcome-deadline" id="home-deadline-badge">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
         <span id="home-campaign-deadline">Plazo: hasta 14 abril 2026</span>
       </div>
@@ -1797,18 +1797,22 @@ function updateCampaignDisplay() {
   const state = getCampaignState();
   const card = document.getElementById('welcome-card');
   const label = document.getElementById('home-campaign-label');
+  const badge = document.getElementById('home-deadline-badge');
   if (card) {
     card.classList.remove('expired', 'stopped', 'no-campaign');
     if (state === 'active') {
       if (label) label.textContent = 'CAMPAÑA ACTIVA';
       card.style.background = '';
+      if (badge) badge.style.background = '#4CAF50';
     } else if (state === 'expired') {
       card.classList.add('expired');
       if (label) label.textContent = 'CAMPAÑA FINALIZADA';
       if (dlEl) dlEl.textContent = `Finalizó el ${formatted}`;
+      if (badge) badge.style.background = 'rgba(255,255,255,0.15)';
     } else {
       card.classList.add('stopped');
       if (label) label.textContent = 'CAMPAÑA DETENIDA';
+      if (badge) badge.style.background = 'rgba(255,255,255,0.15)';
     }
   }
 
