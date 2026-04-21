@@ -93,6 +93,18 @@ body {
 }
 .header-admin:hover { background: rgba(255,255,255,0.2); }
 .header-admin svg { width: 14px; height: 14px; stroke: var(--blanco); fill: none; }
+.header-logout {
+  background: rgba(255,255,255,0.12);
+  border: 1px solid rgba(255,255,255,0.25);
+  border-radius: 8px;
+  padding: 6px 10px;
+  cursor: pointer;
+  transition: background 0.15s;
+  display: flex;
+  align-items: center;
+}
+.header-logout:hover { background: rgba(255,255,255,0.2); }
+.header-logout svg { width: 16px; height: 16px; stroke: white; fill: none; }
 
 /* ===================== SCREENS ===================== */
 .screen { display: none; animation: fadeIn 0.3s ease; }
@@ -646,11 +658,8 @@ body {
 /* Zones wrapper hidden until store selected */
 .zones-wrapper { display: none; }
 
-/* Admin full modal ready state */
-#new-full-campaign-modal .ready { opacity: 1 !important; pointer-events: auto !important; }
-#new-full-campaign-modal .admin-field { margin-bottom: 14px; }
-#new-full-campaign-modal .admin-field label { display: block; font-size: 12px; font-weight: 600; color: #888; margin-bottom: 5px; }
-#new-full-campaign-modal .admin-field input { width: 100%; padding: 10px 12px; border: 1.5px solid #e0e0e0; border-radius: 10px; font-size: 14px; font-family: inherit; box-sizing: border-box; }
+/* Stop campaign modal */
+#stop-campaign-modal { backdrop-filter: blur(4px); }
 </style>
 </head>
 <body>
@@ -710,10 +719,15 @@ body {
         <path fill="white" d="M1486.31,34.39v85.78h-16.37V34.39h-109.85v49.73c0,41.06,33.29,74.35,74.35,74.35h.13-74.47v111.98h74.47c48.11,0,87.11-39,87.11-87.11v-24.87h0c41.13,0,74.47-33.34,74.47-74.47v-49.6h-109.85Z"/>
       </svg>
     </div>
-    <button class="header-admin" onclick="openAdmin()">
-      <svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12.22 2h-.44a2 2 0 00-2 2v.18a2 2 0 01-1 1.73l-.43.25a2 2 0 01-2 0l-.15-.08a2 2 0 00-2.73.73l-.22.38a2 2 0 00.73 2.73l.15.1a2 2 0 011 1.72v.51a2 2 0 01-1 1.74l-.15.09a2 2 0 00-.73 2.73l.22.38a2 2 0 002.73.73l.15-.08a2 2 0 012 0l.43.25a2 2 0 011 1.73V20a2 2 0 002 2h.44a2 2 0 002-2v-.18a2 2 0 011-1.73l.43-.25a2 2 0 012 0l.15.08a2 2 0 002.73-.73l.22-.39a2 2 0 00-.73-2.73l-.15-.08a2 2 0 01-1-1.74v-.5a2 2 0 011-1.74l.15-.09a2 2 0 00.73-2.73l-.22-.38a2 2 0 00-2.73-.73l-.15.08a2 2 0 01-2 0l-.43-.25a2 2 0 01-1-1.73V4a2 2 0 00-2-2z"/><circle cx="12" cy="12" r="3"/></svg>
-      Admin
-    </button>
+    <div style="display:flex;align-items:center;gap:8px;">
+      <button class="header-admin" onclick="openAdmin()">
+        <svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12.22 2h-.44a2 2 0 00-2 2v.18a2 2 0 01-1 1.73l-.43.25a2 2 0 01-2 0l-.15-.08a2 2 0 00-2.73.73l-.22.38a2 2 0 00.73 2.73l.15.1a2 2 0 011 1.72v.51a2 2 0 01-1 1.74l-.15.09a2 2 0 00-.73 2.73l.22.38a2 2 0 002.73.73l.15-.08a2 2 0 012 0l.43.25a2 2 0 011 1.73V20a2 2 0 002 2h.44a2 2 0 002-2v-.18a2 2 0 011-1.73l.43-.25a2 2 0 012 0l.15.08a2 2 0 002.73-.73l.22-.39a2 2 0 00-.73-2.73l-.15-.08a2 2 0 01-1-1.74v-.5a2 2 0 011-1.74l.15-.09a2 2 0 00.73-2.73l-.22-.38a2 2 0 00-2.73-.73l-.15.08a2 2 0 01-2 0l-.43-.25a2 2 0 01-1-1.73V4a2 2 0 00-2-2z"/><circle cx="12" cy="12" r="3"/></svg>
+        Admin
+      </button>
+      <button class="header-logout" onclick="resetApp()" title="Cerrar sesión">
+        <svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+      </button>
+    </div>
   </div>
 
   <div class="home-content">
@@ -817,10 +831,15 @@ body {
         <path fill="white" d="M1486.31,34.39v85.78h-16.37V34.39h-109.85v49.73c0,41.06,33.29,74.35,74.35,74.35h.13-74.47v111.98h74.47c48.11,0,87.11-39,87.11-87.11v-24.87h0c41.13,0,74.47-33.34,74.47-74.47v-49.6h-109.85Z"/>
       </svg>
     </div>
-    <button class="header-admin" onclick="openAdmin()">
-      <svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12.22 2h-.44a2 2 0 00-2 2v.18a2 2 0 01-1 1.73l-.43.25a2 2 0 01-2 0l-.15-.08a2 2 0 00-2.73.73l-.22.38a2 2 0 00.73 2.73l.15.1a2 2 0 011 1.72v.51a2 2 0 01-1 1.74l-.15.09a2 2 0 00-.73 2.73l.22.38a2 2 0 002.73.73l.15-.08a2 2 0 012 0l.43.25a2 2 0 011 1.73V20a2 2 0 002 2h.44a2 2 0 002-2v-.18a2 2 0 011-1.73l.43-.25a2 2 0 012 0l.15.08a2 2 0 002.73-.73l.22-.39a2 2 0 00-.73-2.73l-.15-.08a2 2 0 01-1-1.74v-.5a2 2 0 011-1.74l.15-.09a2 2 0 00.73-2.73l-.22-.38a2 2 0 00-2.73-.73l-.15.08a2 2 0 01-2 0l-.43-.25a2 2 0 01-1-1.73V4a2 2 0 00-2-2z"/><circle cx="12" cy="12" r="3"/></svg>
-      Admin
-    </button>
+    <div style="display:flex;align-items:center;gap:8px;">
+      <button class="header-admin" onclick="openAdmin()">
+        <svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12.22 2h-.44a2 2 0 00-2 2v.18a2 2 0 01-1 1.73l-.43.25a2 2 0 01-2 0l-.15-.08a2 2 0 00-2.73.73l-.22.38a2 2 0 00.73 2.73l.15.1a2 2 0 011 1.72v.51a2 2 0 01-1 1.74l-.15.09a2 2 0 00-.73 2.73l.22.38a2 2 0 002.73.73l.15-.08a2 2 0 012 0l.43.25a2 2 0 011 1.73V20a2 2 0 002 2h.44a2 2 0 002-2v-.18a2 2 0 011-1.73l.43-.25a2 2 0 012 0l.15.08a2 2 0 002.73-.73l.22-.39a2 2 0 00-.73-2.73l-.15-.08a2 2 0 01-1-1.74v-.5a2 2 0 011-1.74l.15-.09a2 2 0 00.73-2.73l-.22-.38a2 2 0 00-2.73-.73l-.15.08a2 2 0 01-2 0l-.43-.25a2 2 0 01-1-1.73V4a2 2 0 00-2-2z"/><circle cx="12" cy="12" r="3"/></svg>
+        Admin
+      </button>
+      <button class="header-logout" onclick="resetApp()" title="Cerrar sesión">
+        <svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+      </button>
+    </div>
   </div>
 
   <div class="upload-content">
@@ -903,10 +922,8 @@ body {
           <label>Fecha de inicio</label>
           <input type="date" id="admin-campaign-start" value="2026-04-12" oninput="markAdminDirty()">
         </div>
-        <div class="admin-field" style="margin-bottom:0;">
-          <label>Plazo de subida para tiendas</label>
-          <input type="date" id="admin-campaign-deadline" value="2026-04-14" oninput="markAdminDirty()">
-        </div>
+        <div style="font-size:12px;color:#999;margin-top:-4px;">Las tiendas tendrán 48 horas desde la fecha de inicio para enviar sus fotos.</div>
+        <input type="hidden" id="admin-campaign-deadline" value="2026-04-14">
       </div>
       <button class="admin-btn-save" id="admin-btn-save" onclick="saveCurrentCampaign()" style="opacity:0.4; pointer-events:none;">
         Guardar cambios
@@ -939,6 +956,7 @@ body {
       <label>Fecha de inicio</label>
       <input type="date" id="new-campaign-start" oninput="checkNewCampaignReady()">
     </div>
+    <div style="font-size:12px;color:#999;margin-top:-4px;margin-bottom:12px;">Las tiendas tendrán 48 horas desde esta fecha para enviar sus fotos.</div>
 
     <button class="new-campaign-btn-create" id="new-campaign-btn-create" onclick="createNewCampaign()">
       Crear campaña y notificar tiendas
@@ -1112,7 +1130,7 @@ const msalInstance = new msal.PublicClientApplication(msalConfig);
 msalInstance.handleRedirectPromise().catch(err => console.error('Redirect error:', err));
 
 // ===================== LOGIN (email para pruebas) =====================
-function handleLogin() {
+async function handleLogin() {
   const emailInput = document.getElementById('login-email');
   const email = emailInput.value.trim().toLowerCase();
 
@@ -1127,6 +1145,8 @@ function handleLogin() {
     isAdmin = true;
     currentUserStore = null;
     document.querySelectorAll('.header-admin').forEach(btn => btn.style.display = 'none');
+    showLoginError('Cargando campaña...');
+    await loadCampaignFromSharePoint();
     goTo('screen-admin-full');
     document.getElementById('admin-full-greeting').textContent = 'Hola, ' + adminUsers[email];
     openAdminFromFull();
@@ -1146,6 +1166,8 @@ function handleLogin() {
     document.getElementById('welcome-card').style.display = 'block';
     document.getElementById('zones-wrapper').style.display = 'block';
     document.getElementById('progress-section').style.display = 'block';
+    showLoginError('Cargando campaña...');
+    await loadCampaignFromSharePoint();
     goTo('screen-home');
     updateHomeUI();
     return;
@@ -1163,11 +1185,24 @@ function showLoginError(msg) {
     document.querySelector('.btn-microsoft').parentNode.appendChild(errorEl);
   }
   errorEl.textContent = msg;
-  setTimeout(() => { if (errorEl) errorEl.textContent = ''; }, 5000);
+  errorEl.style.color = msg.includes('Cargando') ? '#5400BD' : '#e74c3c';
+  if (!msg.includes('Cargando')) {
+    setTimeout(() => { if (errorEl) errorEl.textContent = ''; }, 5000);
+  }
 }
 
 // ===================== GET TOKEN (pide login Microsoft solo al subir fotos) =====================
+function isLocalFile() {
+  return window.location.protocol === 'file:';
+}
+
 async function getAccessToken() {
+  // En modo local (file://), no se puede usar MSAL
+  if (isLocalFile()) {
+    console.log('⚠️ Modo local: SharePoint no disponible');
+    return null;
+  }
+
   // Primero intenta silenciosamente si ya hay sesión
   const accounts = msalInstance.getAllAccounts();
   if (accounts.length > 0) {
@@ -1515,11 +1550,68 @@ async function submitAll() {
 
 // ===================== ADMIN =====================
 let currentCampaign = {
-  name: 'Money Map — Día de la Madre',
-  start: '2026-04-12',
-  deadline: '2026-04-14',
-  active: true
+  name: '',
+  start: '',
+  deadline: '',
+  active: false
 };
+
+// ===================== CAMPAIGN PERSISTENCE (SharePoint) =====================
+const CAMPAIGN_FILE_PATH = 'Milbby Tiendas/Compartir con Responsables tienda/MoneyMap_App/campaign.json';
+
+async function saveCampaignToSharePoint() {
+  try {
+    const token = await getAccessToken();
+    if (!token) { console.warn('No token — campaign not saved to SharePoint'); return; }
+
+    const resolved = await resolveSiteAndDrive(token);
+    if (!resolved) { console.warn('Could not resolve SharePoint'); return; }
+
+    const blob = new Blob([JSON.stringify(currentCampaign)], { type: 'application/json' });
+    const url = `https://graph.microsoft.com/v1.0/drives/${spDriveId}/root:/${CAMPAIGN_FILE_PATH}:/content`;
+    const res = await fetch(url, {
+      method: 'PUT',
+      headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
+      body: blob
+    });
+    if (res.ok) {
+      console.log('✅ Campaign saved to SharePoint');
+    } else {
+      console.error('Failed to save campaign:', res.status);
+    }
+  } catch (err) {
+    console.error('Error saving campaign:', err);
+  }
+}
+
+async function loadCampaignFromSharePoint() {
+  try {
+    const token = await getAccessToken();
+    if (!token) { console.warn('No token — using default campaign'); return false; }
+
+    const resolved = await resolveSiteAndDrive(token);
+    if (!resolved) { console.warn('Could not resolve SharePoint'); return false; }
+
+    const url = `https://graph.microsoft.com/v1.0/drives/${spDriveId}/root:/${CAMPAIGN_FILE_PATH}:/content`;
+    const res = await fetch(url, { headers: { 'Authorization': 'Bearer ' + token } });
+    if (res.ok) {
+      const data = await res.json();
+      if (data && data.name) {
+        currentCampaign = data;
+        updateCampaignDisplay();
+        console.log('✅ Campaign loaded from SharePoint:', data.name);
+        return true;
+      }
+    } else if (res.status === 404) {
+      console.log('No campaign.json found — no active campaign');
+      currentCampaign = { name: '', start: '', deadline: '', active: false };
+      updateCampaignDisplay();
+    }
+  } catch (err) {
+    console.error('Error loading campaign:', err);
+  }
+  return false;
+}
 
 function openAdmin() {
   document.getElementById('admin-campaign-name').value = currentCampaign.name;
@@ -1534,17 +1626,26 @@ function closeAdmin() { document.getElementById('admin-panel').classList.remove(
 function closeAdminOutside(e) { if (e.target === document.getElementById('admin-panel')) closeAdmin(); }
 
 function openAdminFromFull() {
-  document.getElementById('admin-full-campaign-name').value = currentCampaign.name;
-  document.getElementById('admin-full-campaign-start').value = currentCampaign.start;
-  document.getElementById('admin-full-campaign-deadline').value = currentCampaign.deadline;
-  const saveBtn = document.getElementById('admin-full-btn-save');
-  saveBtn.style.opacity = '0.4';
-  saveBtn.style.pointerEvents = 'none';
+  const state = getCampaignState();
+  if (state === 'active') {
+    // Show current campaign data in the form (editing mode)
+    document.getElementById('admin-full-campaign-name').value = currentCampaign.name;
+    document.getElementById('admin-full-campaign-start').value = currentCampaign.start;
+  } else {
+    // Empty form for new campaign
+    document.getElementById('admin-full-campaign-name').value = '';
+    document.getElementById('admin-full-campaign-start').value = '';
+  }
+  const launchBtn = document.getElementById('admin-full-btn-launch');
+  launchBtn.style.opacity = '0.4';
+  launchBtn.style.pointerEvents = 'none';
+  updateCampaignDisplay();
   updateAdminFullState();
 }
 
 function getCampaignState() {
-  if (!currentCampaign.active) return 'stopped';
+  if (!currentCampaign.name || !currentCampaign.active) return 'stopped';
+  if (!currentCampaign.deadline) return 'active';
   const now = new Date();
   now.setHours(0,0,0,0);
   const deadline = new Date(currentCampaign.deadline + 'T23:59:59');
@@ -1552,40 +1653,75 @@ function getCampaignState() {
   return 'active';
 }
 
+function setLaunchBtnText(btn, text) {
+  const nodes = btn.childNodes;
+  for (let i = 0; i < nodes.length; i++) {
+    if (nodes[i].nodeType === 3 && nodes[i].textContent.trim().length > 0) {
+      nodes[i].textContent = ' ' + text + '\n      ';
+      return;
+    }
+  }
+}
+
 function updateAdminFullState() {
   const state = getCampaignState();
   const dot = document.getElementById('admin-full-dot');
-  const label = document.getElementById('admin-full-section-label');
+  const sectionLabel = document.getElementById('admin-full-section-label');
   const card = document.getElementById('admin-full-campaign-card');
   const stopBtn = document.getElementById('admin-full-stop-btn');
   const editSection = document.getElementById('admin-full-edit-section');
+  const formLabel = document.getElementById('admin-full-form-label');
+  const launchBtn = document.getElementById('admin-full-btn-launch');
+
+  // Always show edit section
+  editSection.style.display = 'block';
 
   if (state === 'active') {
     dot.style.background = '#4CAF50';
-    label.textContent = 'Campaña activa';
+    sectionLabel.textContent = 'Campaña activa';
     card.style.background = '#F3EDFC';
+    card.style.display = 'block';
     stopBtn.style.display = 'block';
-    editSection.style.display = 'block';
+    if (formLabel) formLabel.textContent = 'Editar campaña';
+    setLaunchBtnText(launchBtn, 'Guardar cambios');
   } else if (state === 'expired') {
     dot.style.background = '#FF9800';
-    label.textContent = 'Campaña pasada';
+    sectionLabel.textContent = 'Campaña finalizada';
     card.style.background = '#FFF8E1';
+    card.style.display = 'block';
     stopBtn.style.display = 'none';
-    editSection.style.display = 'none';
-  } else { // stopped
-    dot.style.background = '#e74c3c';
-    label.textContent = 'Campaña detenida';
-    card.style.background = '#FFEBEE';
+    if (formLabel) formLabel.textContent = 'Nueva campaña';
+    setLaunchBtnText(launchBtn, 'Lanzar campaña');
+  } else {
+    if (currentCampaign.name) {
+      dot.style.background = '#e74c3c';
+      sectionLabel.textContent = 'Campaña detenida';
+      card.style.background = '#FFEBEE';
+      card.style.display = 'block';
+    } else {
+      card.style.display = 'none';
+    }
     stopBtn.style.display = 'none';
-    editSection.style.display = 'none';
+    if (formLabel) formLabel.textContent = 'Nueva campaña';
+    setLaunchBtnText(launchBtn, 'Lanzar campaña');
   }
 }
 
 function stopCampaign() {
-  if (!confirm('¿Seguro que quieres detener la campaña? Las tiendas ya no podrán subir fotos.')) return;
+  document.getElementById('stop-campaign-modal').style.display = 'flex';
+}
+
+function closeStopModal() {
+  document.getElementById('stop-campaign-modal').style.display = 'none';
+}
+
+function confirmStopCampaign() {
+  closeStopModal();
   currentCampaign.active = false;
   updateCampaignDisplay();
   updateAdminFullState();
+  openAdminFromFull();
+  saveCampaignToSharePoint();
   showToast('Campaña detenida');
 }
 
@@ -1594,40 +1730,68 @@ function markAdminDirty() {
   if (saveBtn) { saveBtn.style.opacity = '1'; saveBtn.style.pointerEvents = 'auto'; }
 }
 function markAdminFullDirty() {
-  const saveBtn = document.getElementById('admin-full-btn-save');
-  if (saveBtn) { saveBtn.style.opacity = '1'; saveBtn.style.pointerEvents = 'auto'; }
+  const name = document.getElementById('admin-full-campaign-name').value.trim();
+  const start = document.getElementById('admin-full-campaign-start').value;
+  const launchBtn = document.getElementById('admin-full-btn-launch');
+  if (launchBtn) {
+    const ready = name && start;
+    launchBtn.style.opacity = ready ? '1' : '0.4';
+    launchBtn.style.pointerEvents = ready ? 'auto' : 'none';
+  }
 }
 
 function saveCurrentCampaign() {
   currentCampaign.name = document.getElementById('admin-campaign-name').value;
   currentCampaign.start = document.getElementById('admin-campaign-start').value;
-  currentCampaign.deadline = document.getElementById('admin-campaign-deadline').value;
+  // Deadline = start + 48h
+  const startDate = new Date(currentCampaign.start + 'T00:00:00');
+  const deadlineDate = new Date(startDate.getTime() + 2 * 24 * 60 * 60 * 1000);
+  currentCampaign.deadline = deadlineDate.toISOString().split('T')[0];
   updateCampaignDisplay();
+  saveCampaignToSharePoint();
   const saveBtn = document.getElementById('admin-btn-save');
   saveBtn.style.opacity = '0.4';
   saveBtn.style.pointerEvents = 'none';
   showToast('Campaña actualizada correctamente');
 }
 
-function saveCurrentCampaignFull() {
-  currentCampaign.name = document.getElementById('admin-full-campaign-name').value;
-  currentCampaign.start = document.getElementById('admin-full-campaign-start').value;
-  currentCampaign.deadline = document.getElementById('admin-full-campaign-deadline').value;
+function launchCampaignFull() {
+  const name = document.getElementById('admin-full-campaign-name').value.trim();
+  const start = document.getElementById('admin-full-campaign-start').value;
+  if (!name || !start) return;
+
+  const state = getCampaignState();
+  const isNew = state !== 'active';
+
+  // Calculate deadline = start + 48h
+  const startDate = new Date(start + 'T00:00:00');
+  const deadlineDate = new Date(startDate.getTime() + 2 * 24 * 60 * 60 * 1000);
+  const deadlineStr = deadlineDate.toISOString().split('T')[0];
+
+  currentCampaign = { name, start, deadline: deadlineStr, active: true };
+
+  if (isNew) {
+    Object.keys(zones).forEach(key => { zones[key].photos = []; });
+  }
+
   updateCampaignDisplay();
-  const saveBtn = document.getElementById('admin-full-btn-save');
-  saveBtn.style.opacity = '0.4';
-  saveBtn.style.pointerEvents = 'none';
-  showToast('Campaña actualizada correctamente');
+  saveCampaignToSharePoint();
+  openAdminFromFull();
+  showToast(isNew ? 'Nueva campaña creada' : 'Campaña actualizada');
 }
 
 function updateCampaignDisplay() {
   const el = document.getElementById('home-campaign-name');
-  if (el) el.textContent = currentCampaign.name;
-  const deadlineDate = new Date(currentCampaign.deadline + 'T00:00:00');
-  const options = { day: 'numeric', month: 'long', year: 'numeric' };
-  const formatted = deadlineDate.toLocaleDateString('es-ES', options);
+  if (el) el.textContent = currentCampaign.name || 'Sin campaña';
+
+  let formatted = '';
+  if (currentCampaign.deadline) {
+    const deadlineDate = new Date(currentCampaign.deadline + 'T00:00:00');
+    const options = { day: 'numeric', month: 'long', year: 'numeric' };
+    formatted = deadlineDate.toLocaleDateString('es-ES', options);
+  }
   const dlEl = document.getElementById('home-campaign-deadline');
-  if (dlEl) dlEl.textContent = `Plazo: hasta ${formatted}`;
+  if (dlEl) dlEl.textContent = formatted ? `Plazo: hasta ${formatted}` : '';
 
   // Update campaign state for store users
   const state = getCampaignState();
@@ -1678,7 +1842,15 @@ function updateCampaignDisplay() {
   const fullEl = document.getElementById('admin-full-current-name');
   if (fullEl) fullEl.textContent = currentCampaign.name;
   const fullStatusEl = document.getElementById('admin-full-current-status');
-  if (fullStatusEl) fullStatusEl.textContent = `${currentCampaign.start} → ${formatted}`;
+  if (fullStatusEl) {
+    if (currentCampaign.start && formatted) {
+      const startDate = new Date(currentCampaign.start + 'T00:00:00');
+      const startFormatted = startDate.toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric' });
+      fullStatusEl.textContent = `${startFormatted} → ${formatted}`;
+    } else {
+      fullStatusEl.textContent = '';
+    }
+  }
   // Update state if admin screen exists
   if (document.getElementById('admin-full-dot')) updateAdminFullState();
 }
@@ -1696,34 +1868,11 @@ function closeNewCampaign() {
   document.getElementById('new-campaign-modal').classList.remove('active');
 }
 
-function openNewCampaignFull() {
-  document.getElementById('new-full-campaign-name').value = '';
-  document.getElementById('new-full-campaign-start').value = '';
-  const createBtn = document.getElementById('new-full-campaign-btn-create');
-  createBtn.classList.remove('ready');
-  createBtn.style.opacity = '0.4';
-  createBtn.style.pointerEvents = 'none';
-  document.getElementById('new-full-campaign-modal').style.display = 'flex';
-}
-function closeNewCampaignFull() {
-  document.getElementById('new-full-campaign-modal').style.display = 'none';
-}
-
 function checkNewCampaignReady() {
   const name = document.getElementById('new-campaign-name').value.trim();
   const start = document.getElementById('new-campaign-start').value;
   const createBtn = document.getElementById('new-campaign-btn-create');
   createBtn.classList[name && start ? 'add' : 'remove']('ready');
-}
-
-function checkNewCampaignFullReady() {
-  const name = document.getElementById('new-full-campaign-name').value.trim();
-  const start = document.getElementById('new-full-campaign-start').value;
-  const createBtn = document.getElementById('new-full-campaign-btn-create');
-  const ready = name && start;
-  createBtn.classList[ready ? 'add' : 'remove']('ready');
-  createBtn.style.opacity = ready ? '1' : '0.4';
-  createBtn.style.pointerEvents = ready ? 'auto' : 'none';
 }
 
 function createNewCampaign() {
@@ -1739,27 +1888,10 @@ function createNewCampaign() {
   Object.keys(zones).forEach(key => { zones[key].photos = []; });
 
   updateCampaignDisplay();
+  saveCampaignToSharePoint();
   closeNewCampaign();
-  showToast('Nueva campaña creada — tiendas notificadas');
+  showToast('Nueva campaña creada');
   if (selectedStore) updateHomeUI();
-}
-
-function createNewCampaignFull() {
-  const name = document.getElementById('new-full-campaign-name').value.trim();
-  const start = document.getElementById('new-full-campaign-start').value;
-  if (!name || !start) return;
-
-  const startDate = new Date(start + 'T00:00:00');
-  const deadlineDate = new Date(startDate.getTime() + 2 * 24 * 60 * 60 * 1000);
-  const deadlineStr = deadlineDate.toISOString().split('T')[0];
-
-  currentCampaign = { name, start, deadline: deadlineStr, active: true };
-  Object.keys(zones).forEach(key => { zones[key].photos = []; });
-
-  updateCampaignDisplay();
-  closeNewCampaignFull();
-  openAdminFromFull();
-  showToast('Nueva campaña creada — tiendas notificadas');
 }
 
 function showToast(msg) {
@@ -1801,6 +1933,9 @@ updateCampaignDisplay();
         <path fill="white" d="M1486.31,34.39v85.78h-16.37V34.39h-109.85v49.73c0,41.06,33.29,74.35,74.35,74.35h.13-74.47v111.98h74.47c48.11,0,87.11-39,87.11-87.11v-24.87h0c41.13,0,74.47-33.34,74.47-74.47v-49.6h-109.85Z"/>
       </svg>
     </div>
+    <button class="header-logout" onclick="resetApp()" title="Cerrar sesión">
+      <svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+    </button>
   </div>
 
   <div style="padding:20px 16px;max-width:440px;margin:0 auto;width:100%;box-sizing:border-box;">
@@ -1820,54 +1955,39 @@ updateCampaignDisplay();
       </div>
     </div>
 
-    <!-- Edit Campaign (only when active) -->
+    <!-- Campaign Form (create or edit) -->
     <div id="admin-full-edit-section" style="margin-bottom:24px;">
-      <div style="font-size:12px;font-weight:600;color:#888;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:10px;">Editar campaña</div>
+      <div style="font-size:12px;font-weight:600;color:#888;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:10px;" id="admin-full-form-label">Nueva campaña</div>
       <div class="admin-field">
         <label>Nombre de la campaña</label>
-        <input type="text" id="admin-full-campaign-name" oninput="markAdminFullDirty()">
+        <input type="text" id="admin-full-campaign-name" placeholder="Money Map — Mayo" oninput="markAdminFullDirty()">
       </div>
       <div class="admin-field">
         <label>Fecha de inicio</label>
         <input type="date" id="admin-full-campaign-start" onchange="markAdminFullDirty()">
       </div>
-      <div class="admin-field">
-        <label>Fecha límite</label>
-        <input type="date" id="admin-full-campaign-deadline" onchange="markAdminFullDirty()">
-      </div>
-      <button class="admin-btn-save" id="admin-full-btn-save" onclick="saveCurrentCampaignFull()" style="opacity:0.4;pointer-events:none;">Guardar cambios</button>
+      <div style="font-size:12px;color:#999;margin-top:-4px;margin-bottom:12px;">Las tiendas tendrán 48 horas desde la fecha de inicio para enviar sus fotos.</div>
+      <input type="hidden" id="admin-full-campaign-deadline">
+      <button class="admin-btn-new" id="admin-full-btn-launch" onclick="launchCampaignFull()" style="opacity:0.4;pointer-events:none;">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Lanzar campaña
+      </button>
     </div>
 
-    <div class="admin-divider"></div>
-
-    <!-- New Campaign -->
-    <button class="admin-btn-new" onclick="openNewCampaignFull()">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-      Lanzar nueva campaña
-    </button>
-
-    <div style="margin-top:32px;text-align:center;">
-      <button onclick="resetApp()" style="background:none;border:none;color:#888;font-size:13px;font-family:inherit;cursor:pointer;padding:8px 16px;">Cerrar sesión</button>
-    </div>
   </div>
 </div>
 
-<!-- New Campaign Modal (Admin Full) -->
-<div id="new-full-campaign-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:200;align-items:center;justify-content:center;">
-  <div style="background:white;border-radius:20px;padding:28px 24px;width:90%;max-width:360px;margin:auto;position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);">
-    <h3 style="font-size:18px;font-weight:700;color:#5400BD;margin:0 0 4px;">Nueva campaña</h3>
-    <p style="font-size:13px;color:#888;margin:0 0 20px;">Se enviará aviso a todas las tiendas.</p>
-    <div class="admin-field">
-      <label>Nombre</label>
-      <input type="text" id="new-full-campaign-name" placeholder="Money Map — Mayo" oninput="checkNewCampaignFullReady()">
+<!-- Stop Campaign Confirmation Modal -->
+<div id="stop-campaign-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:200;align-items:center;justify-content:center;">
+  <div style="background:white;border-radius:20px;padding:28px 24px;width:90%;max-width:360px;margin:auto;position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center;">
+    <div style="width:56px;height:56px;border-radius:50%;background:#FFEBEE;display:flex;align-items:center;justify-content:center;margin:0 auto 16px;">
+      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#e74c3c" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
     </div>
-    <div class="admin-field">
-      <label>Fecha de inicio</label>
-      <input type="date" id="new-full-campaign-start" onchange="checkNewCampaignFullReady()">
-    </div>
-    <div style="display:flex;gap:10px;margin-top:16px;">
-      <button onclick="closeNewCampaignFull()" style="flex:1;padding:12px;border-radius:12px;border:1px solid #ddd;background:white;font-size:14px;font-family:inherit;cursor:pointer;">Cancelar</button>
-      <button id="new-full-campaign-btn-create" onclick="createNewCampaignFull()" style="flex:1;padding:12px;border-radius:12px;border:none;background:#5400BD;color:white;font-size:14px;font-weight:600;font-family:inherit;cursor:pointer;opacity:0.4;pointer-events:none;">Crear</button>
+    <h3 style="font-size:18px;font-weight:700;color:#1a1a2e;margin:0 0 8px;">¿Detener campaña?</h3>
+    <p style="font-size:14px;color:#888;margin:0 0 24px;">Las tiendas ya no podrán subir fotos. Esta acción no se puede deshacer.</p>
+    <div style="display:flex;gap:10px;">
+      <button onclick="closeStopModal()" style="flex:1;padding:12px;border-radius:12px;border:1px solid #ddd;background:white;font-size:14px;font-family:inherit;cursor:pointer;">Cancelar</button>
+      <button onclick="confirmStopCampaign()" style="flex:1;padding:12px;border-radius:12px;border:none;background:#e74c3c;color:white;font-size:14px;font-weight:600;font-family:inherit;cursor:pointer;">Detener</button>
     </div>
   </div>
 </div>
